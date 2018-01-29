@@ -29,6 +29,10 @@ class Game {
     cellClick (e) {
         const $cell = $(e.target);
 
+        if (this.isEnd) {
+            return;
+        }
+
         $cell.addClass(this.player);
 
         if (this.checkRow($cell) || this.checkColumn($cell) || this.checkDiagonal()) {
@@ -40,7 +44,7 @@ class Game {
 
             return;
         }
-        
+
         this.steps.length = this.step;
 
         this.addToHistory($cell);
@@ -52,7 +56,7 @@ class Game {
         } else {
             this.toggleUndo(true);
         }
-        
+
         this.toggleRedo(true);
         this.togglePlayer();
     }
@@ -141,9 +145,11 @@ class Game {
         } else {
             this.message("It's a draw!");
         }
-        
+
         this.toggleUndo(true);
         this.toggleRedo(true);
+
+        this.isEnd = true;
     }
 
     message (text) {
@@ -172,24 +178,24 @@ class Game {
         if (--this.step === 0) {
             this.toggleUndo(true);
         }
-        
+
         const {id} = this.steps[this.step];
-        
+
         $(`[data-id=${id}]`).removeClass().addClass('cell');
-        
+
         this.toggleRedo();
         this.togglePlayer();
     }
 
     redo () {
         const {id, player} = this.steps[this.step];
-        
+
         if (++this.step >= this.steps.length) {
             this.toggleRedo(true);
         }
-        
+
         $(`[data-id=${id}]`).addClass(player);
-        
+
         this.toggleUndo();
         this.togglePlayer();
     }
@@ -197,12 +203,8 @@ class Game {
     addToHistory (cell) {
         const {player} = this;
         const id = this.getCellId(cell);
-        
-        console.log({id, player});
 
         this.steps.push({id, player});
-        
-        console.log(this.steps);
     }
 
     togglePlayer () {
@@ -215,6 +217,7 @@ class Game {
         this.steps = [];
         this.winCells = [];
         this.winDirection = '';
+        this.isEnd = false;
 
         this.message('');
         $(selectors.title).addClass('hidden');
